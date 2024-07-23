@@ -1,7 +1,6 @@
 BITS 32
 
 VGA_WIDTH equ 80
-VGA_HEIGHT equ 20
 
 VGA_BLACK equ 0
 VGA_BLUE equ 1
@@ -49,7 +48,7 @@ set_character_at:
 	.loop:
 		cmp dl, 0
 		jle .stop
-		add cx, 80
+		add cx, VGA_WIDTH
 		dec dl
 		jmp .loop
 	.stop:
