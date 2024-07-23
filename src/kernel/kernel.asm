@@ -1,6 +1,7 @@
 BITS 32
 
 VGA_WIDTH equ 80
+VGA_HEIGHT equ 20
 
 VGA_BLACK equ 0
 VGA_BLUE equ 1
@@ -26,8 +27,9 @@ main:
 	mov byte [color.background], VGA_BLACK
 	mov esi, string
 	
-	call write
-
+	.loop:
+		call write
+		jmp .loop
 	jmp $
 
 
@@ -83,30 +85,79 @@ set_character_at:
 	ret
 
 
+sleep:
+	push eax
+
+	mov eax, 0xFFFFFFF
+
+	.loop:
+		dec eax
+		cmp eax, 0
+		jg  .loop
+
+	pop eax
+	ret
+
+
+scroll:
+	pusha
+	mov ax, 0
+
+	.loop:
+
+		mov cx, ax
+		shl cx, 1
+
+		; cmp ax, VGA_WIDTH
+		; jle .loop
+
+		cmp ax, VGA_HEIGHT * VGA_WIDTH
+		jge .return
+
+		mov bx, word [0xB8000 + ecx + VGA_WIDTH + VGA_WIDTH] ; WHY?????????????????????
+		mov word [0xB8000 + ecx], bx
+
+		inc ax
+		jmp .loop
+	
+	.return:
+		popa
+		ret
+
+
 ; al: ASCII character
 write_character:
 	push cx
+	mov cx, [cursor]	
 	
-	mov cx, [cursor]
-	cmp al, 0x10     ; new line on line feed character
+	cmp al, 0x10      ; new line if line feed character
 	je .new_line
+
+	cmp cl, VGA_WIDTH ; new line if last column
+	jge .new_line
 
 	call set_character_at
 
-	cmp cl, VGA_WIDTH
-	jge .new_line
-
-	inc cl
+	inc cl            ; next column
 	jmp .return
 	
 	.new_line:
-		mov cl, 0    ; reset column
-		inc ch       ; next line
+		call sleep
+
+		cmp ch, VGA_HEIGHT
+		jge .scroll   ; scroll if last line
+
+		mov cl, 0     ; reset column
+		inc ch        ; next line
 		jmp .return
 	
+	.scroll:
+		call scroll
+		mov cl, 0
+		jmp .return
+
 	.return:
 		mov [cursor], cx
-
 		pop cx
 		ret
 
@@ -117,7 +168,7 @@ write:
 
 	.loop:
 		mov al, [esi] ; load character
-		cmp al, 0     ; terminate on null character
+		cmp al, 0     ; terminate if null character
 		je  .return
 
 		call write_character
@@ -139,4 +190,6 @@ cursor:
 	.column: db 0
 	.line: db 0
 
-string: db "Hello world", 0x10, "HI???", 0x10, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 0
+string:
+	db "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", 0x10
+	db 0
