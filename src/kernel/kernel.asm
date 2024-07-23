@@ -1,6 +1,6 @@
 BITS 32
 
-VGA_WIDTH equ 79
+VGA_WIDTH equ 80
 VGA_HEIGHT equ 20
 
 VGA_BLACK equ 0
@@ -23,7 +23,7 @@ VGA_WHITE equ 15
 
 global main
 main:
-	mov byte [color.foreground], 1
+	mov byte [color.foreground], 15
 	mov byte [color.background], 0
 	mov esi, string
 	
@@ -43,19 +43,21 @@ set_character_at:
 	or  bl, bh
 
 	; position
-	push ax
-
-	mov cx, [cursor]
-	mov ax, VGA_WIDTH
-	mul ch
-	add cl, ch
-	
-	pop ax
+	mov cx, 0
+	mov cl, [cursor.column]
+	mov dl, [cursor.line]
+	.loop:
+		cmp dl, 0
+		jle .stop
+		add cx, 80
+		dec dl
+		jmp .loop
+	.stop:
 	shl cx, 1
 
 	; set
-	mov [0xB8000 + ecx], al
-	mov [0xB8001 + ecx], bl
+	mov byte [0xB8000 + ecx], al
+	mov byte [0xB8001 + ecx], bl
 
 	popa
 	ret
@@ -66,9 +68,10 @@ write_character:
 	push cx
 	
 	mov cx, [cursor]
+	cmp al, 0x10
+	je .new_line
 
 	call set_character_at
-	call sleep
 
 	cmp cl, VGA_WIDTH
 	jge .new_line
@@ -77,7 +80,6 @@ write_character:
 	jmp .return
 	
 	.new_line:
-		inc byte [color.foreground]
 		mov cl, 0
 		inc ch
 		jmp .return
@@ -144,4 +146,4 @@ cursor:
 	.column: db 0
 	.line: db 0
 
-string: db "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890AAAAAAAAAA12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890AAAAAAAAAA123456789012345678901234567890123456789", 0
+string: db "Hello world", 0x10, "HI???", 0x10, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 0
