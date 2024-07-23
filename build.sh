@@ -2,9 +2,7 @@ export PATH="$PATH:/usr/local/i386elfgcc/bin"
 
 nasm -f bin "src/bootloader/bootloader.asm" -o "bin/bootloader.bin"
 
-nasm -f elf "src/kernel/kernel.asm" -o "bin/kernel.o" -F dwarf
-# nasm -f elf "src/kernel_loader.asm" -o "bin/kernel_loader.o"
-# i386-elf-gcc -ffreestanding -m32 -g -c "src/kernel/kernel.c" -o "bin/kernel.o"
+nasm -f elf "src/kernel/kernel.asm" -o "bin/kernel.o"
 
 i386-elf-ld -o "bin/kernel.bin" -Ttext 0x1000 "bin/kernel.o" --oformat binary
 
@@ -13,4 +11,4 @@ cat "bin/bootloader.bin" "bin/kernel.bin" "bin/zeroes.bin" > "bin/OS.bin"
 
 qemu-system-x86_64 "bin/OS.bin"
 
-remove bin/*
+rm -rf bin/*
