@@ -11,4 +11,4 @@ cat "bin/bootloader.bin" "bin/kernel.bin" "bin/zeroes.bin" > "bin/OS.bin"
 
 qemu-system-x86_64 "bin/OS.bin"
 
-rm -rf bin/*
+# rm -rf bin/*
