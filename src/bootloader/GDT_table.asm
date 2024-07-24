@@ -1,3 +1,6 @@
+CODE_SEGMENT equ GDT_code - GDT_start
+DATA_SEGMENT equ GDT_data - GDT_start
+
 GDT_start:
 	GDT_null:
 		dw 0x0          ; base

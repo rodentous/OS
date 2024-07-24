@@ -30,18 +30,22 @@ global main
 main:
 	mov byte [color.foreground], VGA_WHITE
 	mov byte [color.background], VGA_BLACK
-	mov esi, string
 	
-	.loop:
-		call write
-		jmp .loop
+	mov esi, title_text
+	call write
 	
+	; mov esi, prompt_text
+	; .loop:
+	; 	call write
+	; 	times 10 call sleep
+	; 	jmp .loop
+
 	jmp $
 
 
 sleep:
 	push eax
-	mov eax, 0xA00000
+	mov eax, 0xFFFFFFF
 
 	.loop:
 		dec eax
@@ -52,7 +56,7 @@ sleep:
 	ret
 
 
-; return ecx: VGA buffer id
+; return cx: VGA buffer id
 get_vga_buffer_id:
 	push dx
 	xor ecx, ecx             ; reset ecx
@@ -76,8 +80,35 @@ get_vga_buffer_id:
 		ret
 
 
+set_vga_cursor:              ; i dont know how this code works yet
+	pusha
+	
+	call get_vga_buffer_id
+	shr cx, 1
+	mov bx, cx
+
+	mov dx, 0x03D4
+	mov al, 0x0F
+	out dx, al
+
+	inc dl
+	mov al, bl
+	out dx, al
+
+	dec dl
+	mov al, 0x0E
+	out dx, al
+
+	inc dl
+	mov al, bh
+	out dx, al
+
+	popa
+	ret
+
+
 ; al: ASCII character
-set_character_at:
+set_character:
 	push ax
 	push cx
 	; VGA entry is represented as 16-bit word:
@@ -158,14 +189,14 @@ write_character:
 	cmp al, 0x10             ; new line if line feed character
 	je  .new_line
 
-	call set_character_at    ; write character
+	call set_character       ; write character
 
 	inc cl                   ; next column
 	jmp .return
 	
 	.new_line:
-		cmp ch, VGA_HEIGHT - 1
-		jge .scroll          ; scroll screen up if last line
+		cmp ch, VGA_HEIGHT-1 ; scroll screen up if last line
+		jge .scroll
 
 		mov cl, 0            ; reset column
 		inc ch               ; next line
@@ -192,6 +223,7 @@ write:
 		je  .return
 
 		call write_character
+		call set_vga_cursor
 		call sleep
 
 		inc esi              ; next character
@@ -211,8 +243,6 @@ cursor:
 	.column: db 0
 	.line: db 0
 
-string:
-	db "Lorem ipsum dolor sit amet, consectetur adipiscing elit, ", 0x10
-	db "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", 0x10
-	db 0x10
-	db 0
+
+title_text: db "Welcome to fake_OS", 0x10, 0
+prompt_text: db 0x10, "user ~ > ", 0
