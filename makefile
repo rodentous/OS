@@ -1,6 +1,6 @@
 asm := nasm
-ld := /usr/local/i386elfgcc/bin/i386-elf-ld
-gcc := /usr/local/i386elfgcc/bin/i386-elf-gcc
+ld := i386-elf-ld
+gcc := i386-elf-gcc
 qemu := qemu-system-x86_64
 
 all: bootloader kernel concatenate run clean
