@@ -19,20 +19,15 @@ disk_load:
 
     pop dx
     cmp al, dh               ; check if number of sectors read is correct
-    jne .sectors_error
+    jne .disk_error
 
 	jmp .return
 
 	.disk_error:
-        mov  esi, [disk_read_error]
+        mov  esi, disk_read_error
         call write
 		jmp $
 
-	.sectors_error:
-        mov  esi, [sectors_error]
-        call write
-		jmp $
-    
 	.return:
 		popa
 		ret
@@ -213,4 +208,3 @@ write:
 
 enable_A20_error: db "Failed to enable A20", 0x0d, 0x0a, 0
 disk_read_error: db "Disk read error", 0x0d, 0x0a, 0
-sectors_error: db "Incorrect number of sectors read", 0x0d, 0x0a, 0

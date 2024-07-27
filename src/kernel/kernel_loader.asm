@@ -1,9 +1,7 @@
 [bits 32]
-
 [extern main]
 
-
-lidt
+lidt [IDT_descriptor]
 call main
 
 %include "src/kernel/IDT.asm"

@@ -28,5 +28,5 @@ GDT:
 	GDT_end:
 
 GDT_descriptor:
-	dw GDT_end - GDT - 1
-	dd GDT
+	dw GDT_end - GDT - 1    ; length
+	dd GDT                  ; base

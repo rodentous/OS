@@ -196,7 +196,6 @@ write:
 
 		call write_character
 		call set_vga_cursor
-		call sleep
 
 		inc esi              ; next character
 		jmp .loop

@@ -12,13 +12,11 @@ switch_to_protected_mode:
 	mov dh, 2                     ; number of sectors
 	mov dl, dl                    ; disk
 	call disk_load
-
+	
 	call enter_text_mode          ; clear screen
 	call enable_A20               ; disable wraparound after A19 address line
-
-	; switch to protected mode:
-	cli                           ; disable interupts
 	lgdt [GDT_descriptor]         ; load GDT descriptor
+	cli                           ; disable interupts
 
 	; set PE (protection enable) bit in cr0 (control register 0):
 	mov eax, cr0
@@ -53,7 +51,7 @@ start_protected_mode:
 	mov esi, boot_error
 	jmp $
 
-boot_error: db "Failed to enable protected mode", 0x0d, 0x0a, 0
+boot_error: db "Failed to boot not_an_OS", 0x0d, 0x0a, 0
 
 ; set last 2 bytes to aa55
 times 510-($-$$) db 0

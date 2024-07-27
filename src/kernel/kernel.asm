@@ -4,7 +4,9 @@ global main
 main:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
-	
+
+	int 0x0
+
 	mov esi, title_text
 	call write
 	
@@ -23,7 +25,7 @@ sleep:
 	pop eax
 	ret
 
-%include "src/kernel/io_functions.asm"
+%include "src/kernel/VGA_functions.asm"
 
-title_text: db "Welcome to fake_OS", 0x10, 0
+title_text: db "Welcome to not an OS,", 0x10, 0
 prompt_text: db 0x10, "user ~ > ", 0
