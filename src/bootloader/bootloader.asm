@@ -24,10 +24,9 @@ switch_to_protected_mode:
 	mov cr0, eax
 
 	; start protected mode
-	jmp CODE_SEGMENT:start_protected_mode
+    jmp CODE_SEGMENT:start_protected_mode
 	
 	jmp $
-
 
 %include "src/bootloader/GDT.asm"
 %include "src/bootloader/functions.asm"
@@ -51,7 +50,8 @@ start_protected_mode:
 	mov esi, boot_error
 	jmp $
 
-boot_error: db "Failed to boot not_an_OS", 0x0d, 0x0a, 0
+
+boot_error: db "Failed to boot", 0x0d, 0x0a, 0
 
 ; set last 2 bytes to aa55
 times 510-($-$$) db 0

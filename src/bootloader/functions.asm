@@ -50,7 +50,7 @@ enable_A20:
         cmp  ax, 1
         je   .return
         
-        mov esi, disk_read_error
+        mov esi, enable_A20_error
         call write
         jmp $
 
@@ -67,7 +67,7 @@ enable_A20:
         ret
 
 
-; return ax:  is A20 enabled? (1 if yes)
+; return ax:  1 if A20 is enabled, 0 otherwise
 check_A20:
 	pushf
 	push si
@@ -204,6 +204,7 @@ write:
         pop esi
         pop ax
         ret
+
 
 
 enable_A20_error: db "Failed to enable A20", 0x0d, 0x0a, 0
