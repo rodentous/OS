@@ -2,17 +2,20 @@
 
 global _start
 _start:
-	;call setup_idt
+	cli
+
+	call setup_idt
+
+	sti
 
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
 
 	mov esi, title_text
 	call write
-	;int 0x0	
-	mov esi, title_text
-	call write
 	
+	int 0x0
+
 	jmp $
 
 
@@ -29,9 +32,16 @@ sleep:
 	ret
 
 
+isr_handler:
+	mov esi, interrupt_text
+	call write
+	ret
+	
+
 %include "src/kernel/VGA_functions.asm"
 %include "src/kernel/IDT.asm"
 
 
 
 title_text: db "Hello Kernel", 0x10, 0
+interrupt_text: db "Interrupt received!", 0x10, 0
