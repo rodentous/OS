@@ -1,3 +1,4 @@
+extern interrupt_handler
 isr_common_stub:
 	pusha
 
@@ -7,20 +8,21 @@ isr_common_stub:
 	iret
 
 
+; Interrupt Service Routines
 global isr_0
 isr_0:
-	cli
+	cli                      ; disable interrupts
 	hlt
-;	cli                      ; disable interrupts
-;	push byte 0              ; push a dummy error code (if isr0 doesn't push it's own error code)
-;	push byte 0              ; push the interrupt number (0)
-;	jmp isr_common_stub
+	push byte 0              ; push a dummy error code (if isr0 doesn't push it's own error code)
+	push byte 0              ; push the interrupt number (0)
+	jmp isr_common_stub
 
 %macro isr 1
 	global isr_%1
 
 	isr_%1:
 		cli
+		hlt
 	    push byte 0
 	    push byte %1
 	    jmp isr_common_stub
@@ -34,9 +36,6 @@ isr_0:
 
 
 
-setup_idt:
-	lidt [IDT_descriptor]
-	ret
 
 
 
@@ -46,6 +45,7 @@ setup_idt:
 	db 0b00001001            ; gate type(4) - for long mode, ???(1), dpl(2) - privilege levels that can use interrupt, present(1)
 	db 0x00                  ; reserved
 %endmacro
+
 
 IDT:                         ; Interrupt Descriptor Table
 	%assign n 0
@@ -58,3 +58,15 @@ IDT_end:
 IDT_descriptor:
 	dw IDT_end - IDT - 1     ; length
 	dd IDT                   ; base
+
+
+
+
+setup_idt:
+	cli
+	lidt [IDT_descriptor]
+	sti
+	ret
+
+	.error:
+		hlt

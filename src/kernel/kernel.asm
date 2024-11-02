@@ -8,11 +8,14 @@ _start:
 	mov esi, kernel_text
 	call write
 
-	cli
 	call setup_idt
-	sti
+
+	in ax, 0x60
+	cmp ax, 0x0
+	jne interrupt_handler
 	
-	; int 0x0
+	mov esi, hello_text
+	call write
 
 	cli
 	hlt
@@ -31,6 +34,7 @@ sleep:
 	ret
 
 
+global interrupt_handler
 interrupt_handler:
 	mov esi, interrupt_text
 	call write
@@ -44,3 +48,4 @@ interrupt_handler:
 
 kernel_text: db 0x10, "Starting kernel...", 0x10, 0
 interrupt_text: db "Interrupt received!", 0x10, 0
+hello_text: db "Hello from kernel!", 0x10, 0
