@@ -8,12 +8,15 @@ switch_to_protected_mode:
 	mov es, ax
 	mov ds, ax
 
+	call enter_text_mode          ; clear screen
+	mov esi, boot_text
+	call write
+
 	; read disk:
 	mov dh, 2                     ; number of sectors
 	mov dl, dl                    ; disk
 	call disk_load
 	
-	call enter_text_mode          ; clear screen
 	call enable_A20               ; disable wraparound after A19 address line
 	lgdt [GDT_descriptor]         ; load GDT descriptor
 	cli                           ; disable interupts
@@ -26,7 +29,7 @@ switch_to_protected_mode:
 	; start protected mode
     jmp CODE_SEGMENT:start_protected_mode
 	
-	jmp $
+	hlt
 
 %include "src/bootloader/GDT.asm"
 %include "src/bootloader/functions.asm"
@@ -47,11 +50,10 @@ start_protected_mode:
 	mov esp, ebp
 
 	jmp KERNEL
-	mov esi, boot_error
-	jmp $
+	hlt
 
 
-boot_error: db "Failed to boot", 0x0d, 0x0a, 0
+boot_text: db "Booting... ", 0
 
 ; set last 2 bytes to aa55
 times 510-($-$$) db 0

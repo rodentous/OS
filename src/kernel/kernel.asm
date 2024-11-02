@@ -2,21 +2,20 @@
 
 global _start
 _start:
-	cli
-
-	call setup_idt
-
-	sti
-
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
 
-	mov esi, title_text
+	mov esi, kernel_text
 	call write
-	
-	int 0x0
 
-	jmp $
+	cli
+	call setup_idt
+	sti
+	
+	; int 0x0
+
+	cli
+	hlt
 
 
 sleep:
@@ -32,7 +31,7 @@ sleep:
 	ret
 
 
-isr_handler:
+interrupt_handler:
 	mov esi, interrupt_text
 	call write
 	ret
@@ -43,5 +42,5 @@ isr_handler:
 
 
 
-title_text: db "Hello Kernel", 0x10, 0
+kernel_text: db 0x10, "Starting kernel...", 0x10, 0
 interrupt_text: db "Interrupt received!", 0x10, 0

@@ -3,7 +3,7 @@ ld := i386-elf-ld
 gcc := i386-elf-gcc
 qemu := qemu-system-x86_64
 
-all: bootloader kernel concatenate run clean
+all: clean bootloader kernel concatenate run
 
 bootloader:
 	${asm} -f bin "src/bootloader/bootloader.asm" -o "bin/bootloader.bin"

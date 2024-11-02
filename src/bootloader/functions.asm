@@ -26,7 +26,7 @@ disk_load:
 	.disk_error:
         mov  esi, disk_read_error
         call write
-		jmp $
+		hlt
 
 	.return:
 		popa
@@ -52,15 +52,15 @@ enable_A20:
         
         mov esi, enable_A20_error
         call write
-        jmp $
+        hlt
 
-    call enable_A20_keyboard_controller
+    in al, 0xee
     call .check_A20
-
+    
     call enable_A20_fast
     call .check_A20
 
-    in al, 0xee
+    call enable_A20_keyboard_controller
     call .check_A20
 
     .return:
