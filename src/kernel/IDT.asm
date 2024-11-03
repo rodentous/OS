@@ -1,72 +1,42 @@
-extern interrupt_handler
-isr_common_stub:
-	pusha
-
-	call interrupt_handler   ; from kernel.asm
-
-	popa
-	iret
+%include "src/kernel/ISR.asm"
 
 
-; Interrupt Service Routines
-global isr_0
-isr_0:
-	cli                      ; disable interrupts
-	hlt
-	push byte 0              ; push a dummy error code (if isr0 doesn't push it's own error code)
-	push byte 0              ; push the interrupt number (0)
-	jmp isr_common_stub
-
-%macro isr 1
-	global isr_%1
-
-	isr_%1:
-		cli
-		hlt
-	    push byte 0
-	    push byte %1
-	    jmp isr_common_stub
-%endmacro
-
-%assign i 1
-%rep 31
-	isr i
-	%assign i i+1
-%endrep
-
-
-
-
-
-
-%macro idt_entry 1
-	dd isr_%1                ; offset - corresponding isr
-	dw 0x08                  ; GDT code segment
-	db 0b00001001            ; gate type(4) - for long mode, ???(1), dpl(2) - privilege levels that can use interrupt, present(1)
-	db 0x00                  ; reserved
+%macro gate_descriptor 1
+	mov eax, isr_0
+    mov [IDT + %1 * 8], ax
+    mov word [IDT + %1 * 8 + 2], 0x08
+    mov word [IDT + %1 * 8 + 4], 0x8E00
+    shr eax, 16
+    mov [IDT + %1 * 8 + 6], ax
 %endmacro
 
 
 IDT:                         ; Interrupt Descriptor Table
-	%assign n 0
-	%rep 32
-		idt_entry n
-		%assign n n+1
-	%endrep
-IDT_end:
+	resb 50 * 8
+	.end:
 
 IDT_descriptor:
-	dw IDT_end - IDT - 1     ; length
+	dw (IDT.end - IDT) - 1   ; length
 	dd IDT                   ; base
-
-
 
 
 setup_idt:
 	cli
+
 	lidt [IDT_descriptor]
+	
+;	mov eax, isr_0
+;   mov [IDT + 49 * 8], ax
+;   mov word [IDT + 49 * 8 + 2], 0x08
+;   mov word [IDT + 49 * 8 + 4], 0x8E00
+;   shr eax, 16
+;   mov [IDT + 49 * 8 + 6], ax
+	%assign n 0
+	%rep 1
+		gate_descriptor n
+		%assign n n+1
+	%endrep
+
+
 	sti
 	ret
-
-	.error:
-		hlt

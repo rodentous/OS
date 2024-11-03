@@ -10,9 +10,11 @@ _start:
 
 	call setup_idt
 
-	in ax, 0x60
-	cmp ax, 0x0
-	jne interrupt_handler
+	int 0
+	
+;	in ax, 0x60
+;	cmp ax, 0x0
+;	jne interrupt_handler
 	
 	mov esi, hello_text
 	call write
@@ -43,7 +45,6 @@ interrupt_handler:
 
 %include "src/kernel/VGA_functions.asm"
 %include "src/kernel/IDT.asm"
-
 
 
 kernel_text: db 0x10, "Starting kernel...", 0x10, 0
