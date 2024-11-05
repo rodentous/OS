@@ -5,6 +5,10 @@ qemu := qemu-system-x86_64
 
 all: clean bootloader kernel concatenate run
 
+clean:
+	clear
+	rm -rf bin/*
+
 bootloader:
 	${asm} -f bin "src/bootloader/bootloader.asm" -o "bin/bootloader.bin"
 
@@ -18,7 +22,3 @@ concatenate:
 
 run:
 	${qemu} -drive format=raw,file="bin/OS.bin"
-
-clean:
-	clear
-	rm -rf bin/*

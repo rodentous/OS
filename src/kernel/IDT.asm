@@ -12,7 +12,7 @@
 
 
 IDT:                         ; Interrupt Descriptor Table
-	resb 50 * 8
+	resb 32 * 8
 	.end:
 
 IDT_descriptor:
@@ -24,19 +24,12 @@ setup_idt:
 	cli
 
 	lidt [IDT_descriptor]
-	
-;	mov eax, isr_0
-;   mov [IDT + 49 * 8], ax
-;   mov word [IDT + 49 * 8 + 2], 0x08
-;   mov word [IDT + 49 * 8 + 4], 0x8E00
-;   shr eax, 16
-;   mov [IDT + 49 * 8 + 6], ax
+
 	%assign n 0
 	%rep 1
 		gate_descriptor n
 		%assign n n+1
 	%endrep
-
 
 	sti
 	ret

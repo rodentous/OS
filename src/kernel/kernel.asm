@@ -12,9 +12,9 @@ _start:
 
 	int 0
 	
-;	in ax, 0x60
-;	cmp ax, 0x0
-;	jne interrupt_handler
+	; in ax, 0x60
+	; cmp ax, 0x0
+	; jne interrupt_handler
 	
 	mov esi, hello_text
 	call write
@@ -38,8 +38,12 @@ sleep:
 
 global interrupt_handler
 interrupt_handler:
+	pusha
+
 	mov esi, interrupt_text
 	call write
+	
+	popa
 	ret
 	
 

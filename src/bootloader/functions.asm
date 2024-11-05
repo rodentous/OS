@@ -182,7 +182,7 @@ enable_A20_fast:
         ret
 
 
-; esi: pointer to string
+; esi: string pointer
 write:
     push ax
     push esi
