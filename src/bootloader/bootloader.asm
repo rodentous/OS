@@ -8,18 +8,28 @@ switch_to_protected_mode:
 	mov es, ax
 	mov ds, ax
 
+
 	call enter_text_mode          ; clear screen
 	mov esi, boot_text
-	call write
+	call write                    ; write "Booting..."
 
-	; read disk:
+
 	mov dh, 2                     ; number of sectors
 	mov dl, dl                    ; disk
-	call disk_load
+	call disk_load                ; read disk
 	
+	mov esi, disk_text
+	call write                    ; write "Disk loaded"
+
+
 	call enable_A20               ; disable wraparound after A19 address line
 	lgdt [GDT_descriptor]         ; load GDT descriptor
 	cli                           ; disable interupts
+
+
+	mov esi, kernel_text
+	call write                    ; write "GDT set up"
+
 
 	; set PE (protection enable) bit in cr0 (control register 0):
 	mov eax, cr0
@@ -53,8 +63,10 @@ start_protected_mode:
 	hlt
 
 
-boot_text: db "Booting... ", 0
+boot_text:   db "Booting...", 0x0D, 0x0A, 0
+disk_text:   db "-Disk loaded", 0x0D, 0x0A, 0
+kernel_text: db "-Starting kernel", 0
 
-; set last 2 bytes to aa55
+; set last 2 bytes to AA55 (magic bytes for bootloader)
 times 510-($-$$) db 0
-dw 0xaa55
+dw 0xAA55

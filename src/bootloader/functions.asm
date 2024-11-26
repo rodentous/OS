@@ -54,7 +54,7 @@ enable_A20:
         call write
         hlt
 
-    in al, 0xee
+    in al, 0xEE
     call .check_A20
     
     call enable_A20_fast
@@ -80,7 +80,7 @@ check_A20:
 	mov ds, ax
 	mov si, 0x0500
 
-	mov ax, 0xffff           ; [0xffff:0x0510] - [es:di]
+	mov ax, 0xFFFF           ; [0xFFFF:0x0510] - [es:di]
 	mov es, ax
 	mov di, 0x0510
 
@@ -187,7 +187,7 @@ write:
     push ax
     push esi
 
-    mov ah, 0x0e
+    mov ah, 0x0E
 
     .loop:
         mov al, [esi]
@@ -207,5 +207,5 @@ write:
 
 
 
-enable_A20_error: db "Failed to enable A20", 0x0d, 0x0a, 0
-disk_read_error: db "Disk read error", 0x0d, 0x0a, 0
+enable_A20_error: db "Failed to enable A20", 0x0D, 0x0A, 0
+disk_read_error: db "Disk read error", 0x0D, 0x0A, 0

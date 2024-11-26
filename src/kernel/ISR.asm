@@ -8,16 +8,7 @@ isr_common_stub:
 	iret
 
 
-
 ; Interrupt Service Routines
-global isr_0
-isr_0:
-	cli                       ; disable interrupts
-	; push byte 0               ; push a dummy error code (if isr0 doesn't push it's own error code)
-	; push byte 0               ; push the interrupt number (0)
-	jmp isr_common_stub       ; common interupt stub
-	hlt
-
 %macro isr 1
 global isr_%1
 isr_%1:
@@ -28,8 +19,9 @@ isr_%1:
 	hlt
 %endmacro
 
-%assign i 1
-%rep 32
+
+%assign i 0
+%rep 1
 	isr i
 	%assign i i+1
 %endrep

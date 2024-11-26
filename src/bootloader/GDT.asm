@@ -11,7 +11,7 @@ GDT:
 		db 0x0          ; ?
 		
 	.code:
-		dw 0xffff       ; base
+		dw 0xFFFF       ; base
 		dw 0x0          ; limit
 		db 0x0          ; ?
 		db 0b10011010   ; access byte  [ present, privilege(3), type, executable, direction/conforming, readable/writable, accessed ]
@@ -19,7 +19,7 @@ GDT:
 		db 0x0          ; ?
 
 	.data:
-		dw 0xffff       ; base
+		dw 0xFFFF       ; base
 		dw 0x0          ; limit
 		db 0x0          ; ?
 		db 0b10010010   ; access byte  [ present, privilege(3), type, executable, direction/conforming, readable/writable, accessed ]

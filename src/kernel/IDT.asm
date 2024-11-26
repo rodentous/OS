@@ -1,6 +1,5 @@
 %include "src/kernel/ISR.asm"
 
-
 %macro gate_descriptor 1
 	mov eax, isr_0
     mov [IDT + %1 * 8], ax
@@ -12,7 +11,7 @@
 
 
 IDT:                         ; Interrupt Descriptor Table
-	resb 32 * 8
+	resb 8 * 0
 	.end:
 
 IDT_descriptor:
@@ -25,10 +24,10 @@ setup_idt:
 
 	lidt [IDT_descriptor]
 
-	%assign n 0
+	%assign i 0
 	%rep 1
-		gate_descriptor n
-		%assign n n+1
+		gate_descriptor i
+		%assign i i+1
 	%endrep
 
 	sti
