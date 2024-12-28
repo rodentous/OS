@@ -1,7 +1,7 @@
 [org 0x7c00]
 
-KERNEL equ 0x1000
 
+KERNEL equ 0x1000
 switch_to_protected_mode:
 	; reset all segments:
 	xor ax, ax
@@ -28,7 +28,7 @@ switch_to_protected_mode:
 
 
 	mov esi, kernel_text
-	call write                    ; write "GDT set up"
+	call write                    ; write "Starting kernel"
 
 
 	; set PE (protection enable) bit in cr0 (control register 0):
@@ -41,8 +41,11 @@ switch_to_protected_mode:
 	
 	hlt
 
+
+
 %include "src/bootloader/GDT.asm"
 %include "src/bootloader/functions.asm"
+
 
 
 ; 32 bit protected mode:
@@ -61,6 +64,7 @@ start_protected_mode:
 
 	jmp KERNEL
 	hlt
+
 
 
 boot_text:   db "Booting...", 0x0D, 0x0A, 0

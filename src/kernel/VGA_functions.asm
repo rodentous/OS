@@ -151,6 +151,29 @@ scroll:
 		ret
 
 
+new_line:
+	push cx
+	mov cx, [cursor]
+
+	cmp ch, VGA_HEIGHT-1     ; scroll screen up if last line
+	jge .scroll
+
+	mov cl, 0                ; reset column
+	inc ch                   ; next line
+	jmp .return
+
+	.scroll:
+		mov cl, 0
+		call scroll
+		jmp .return
+
+	.return:
+		mov [cursor], cx     ; set cursor position
+		call set_vga_cursor
+		pop cx
+		ret
+
+
 ; al: ASCII character
 write_character:
 	push cx
@@ -181,6 +204,7 @@ write_character:
 
 	.return:
 		mov [cursor], cx     ; set cursor position
+		call set_vga_cursor
 		pop cx
 		ret
 
@@ -195,12 +219,40 @@ write:
 		je  .return
 
 		call write_character
-		call set_vga_cursor
 
 		inc esi              ; next character
 		jmp .loop
 
 	.return:
+		popa
+		ret
+
+
+; al: number
+write_number:
+	pusha
+	
+	.loop:
+		cmp al, 10
+		jl  .return
+
+		xor ah, ah
+		mov bl, 10
+		div bl
+
+		mov dl, al
+
+		add ah, '0'
+		mov al, ah
+		call write_character
+		
+		mov al, dl
+
+		jmp .loop
+
+	.return:
+		add al, '0'
+		call write_character
 		popa
 		ret
 

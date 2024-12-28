@@ -1,39 +1,31 @@
 [bits 32]
 
+
 global _start
 _start:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
 
+	times 4 call new_line
+а
 	mov  esi, kernel_text
 	call write
 
 	call setup_idt
 	
+	int 0
+	int 1
+	int 2
+	int 3
+	int 4
+
 	; in  ax, 0x60
 	; cmp ax, 0x0
 	; jne interrupt_handler
-	
-	mov  esi, hello_text
-	call write
-
-	int 0
 
 	cli
 	hlt
 
-
-sleep:
-	push eax
-	mov  eax, 0xFFFFFFF
-
-	.loop:
-		dec eax
-		cmp eax, 0
-		jg  .loop
-
-	pop eax
-	ret
 
 
 global interrupt_handler
@@ -42,14 +34,18 @@ interrupt_handler:
 
 	mov  esi, interrupt_text
 	call write
+
+	call write_number
+	call new_line
 	
 	popa
 	ret
-	
+
+
 
 %include "src/kernel/VGA_functions.asm"
-%include "src/kernel/IDT.asm"
 
-kernel_text:    db 0x10, 0x10, 0x10, 0x10, "Starting kernel...", 0x10, 0
-interrupt_text: db "Interrupt received", 0x10, 0
-hello_text:     db "Hello from kernel!", 0x10, 0
+kernel_text:    db "Starting kernel...", 0x10, 0
+interrupt_text: db "Interrupt received: ", 0
+
+%include "src/kernel/IDT.asm"
