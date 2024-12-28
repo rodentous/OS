@@ -9,27 +9,35 @@ switch_to_protected_mode:
 	mov ds, ax
 
 
-	call enter_text_mode          ; clear screen
+	; clear screen
+	call enter_text_mode
+
+	; write "== OS Bootloader =="
 	mov esi, boot_text
-	call write                    ; write "Booting..."
+	call write
 
-
-	mov dh, 2                     ; number of sectors
-	mov dl, dl                    ; disk
+	mov dh, 2                     ; number of sectors to read
+	mov dl, dl ; (set by bios)    ; disk number
 	call disk_load                ; read disk
-	
+	; write "Disk loaded"
 	mov esi, disk_text
-	call write                    ; write "Disk loaded"
+	call write
 
+	; disable wraparound after A19 address line
+	call enable_A20
 
-	call enable_A20               ; disable wraparound after A19 address line
-	lgdt [GDT_descriptor]         ; load GDT descriptor
-	cli                           ; disable interupts
+	; load GDT descriptor
+	lgdt [GDT_descriptor]
+	; write "GDT"
+	mov esi, GDT_text
+	call write
 
-
+	; write "kernel"
 	mov esi, kernel_text
-	call write                    ; write "Starting kernel"
+	call write
 
+	; disable interupts
+	cli
 
 	; set PE (protection enable) bit in cr0 (control register 0):
 	mov eax, cr0
@@ -42,9 +50,9 @@ switch_to_protected_mode:
 	hlt
 
 
-
 %include "src/bootloader/GDT.asm"
 %include "src/bootloader/functions.asm"
+
 
 
 
@@ -62,15 +70,18 @@ start_protected_mode:
 	mov ebp, 0x90000
 	mov esp, ebp
 
+	; far jump to kernel
 	jmp KERNEL
 	hlt
 
 
 
-boot_text:   db "Booting...", 0x0D, 0x0A, 0
+
+boot_text:   db "== OS Bootloader ==", 0x0D, 0x0A, 0
 disk_text:   db "-Disk loaded", 0x0D, 0x0A, 0
+GDT_text:    db "-GDT", 0x0D, 0x0A, 0
 kernel_text: db "-Starting kernel", 0
 
-; set last 2 bytes to AA55 (magic bytes for bootloader)
+; set last 2 bytes to 0xAA55 (magic number)
 times 510-($-$$) db 0
 dw 0xAA55

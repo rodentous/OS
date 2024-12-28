@@ -1,6 +1,47 @@
+disk_read_error:  db "Disk read error", 0x0D, 0x0A, 0
+enable_A20_error: db "Failed to enable A20", 0x0D, 0x0A, 0
+
+
+; ==clear screen==
+enter_text_mode:
+    push ax
+
+    mov ah, 0x0
+	mov al, 0x3
+	int 0x10
+    
+    pop ax
+    ret
+
+
+; ==write string on screen==
+; esi: string pointer
+write:
+    push ax
+    push esi
+
+    mov ah, 0x0E
+
+    .loop:
+        mov al, [esi]
+
+        cmp al, 0
+        je  .return
+
+        int 0x10
+
+        inc esi
+        jmp .loop
+
+    .return:
+        pop esi
+        pop ax
+        ret
+
+
+; ==load sectors into [es:bx] from disk==
 ; dl: drive number
 ; dh: number of sectors to load
-; loads sectors into [es:bx]
 disk_load:
     pusha
     push dx
@@ -33,18 +74,11 @@ disk_load:
 		ret
 
 
-enter_text_mode:
-    push ax
-
-    mov ah, 0x0
-	mov al, 0x3
-	int 0x10
-    
-    pop ax
-    ret
 
 
+; ==disable wraparound after A19 address line==
 enable_A20:
+    ; returns if A20 is enabled
     .check_A20:
         call check_A20
         cmp  ax, 1
@@ -52,22 +86,25 @@ enable_A20:
         
         mov esi, enable_A20_error
         call write
-        hlt
 
-    in al, 0xEE
-    call .check_A20
+    ; try:
+    in  al, 0xEE
+    jmp .check_A20 ; check
     
+    ; try:
     call enable_A20_fast
-    call .check_A20
+    jmp  .check_A20 ; check
 
+    ; try:
     call enable_A20_keyboard_controller
-    call .check_A20
+    jmp  .check_A20 ; check
 
     .return:
         ret
 
 
-; return ax:  1 if A20 is enabled, 0 otherwise
+; ==chack whether A20 is enbled==
+; return ax: is A20 enabled?
 check_A20:
 	pushf
 	push si
@@ -119,6 +156,9 @@ check_A20:
     .above_MB:	db 0
 
 
+
+
+; two ways to enable A20:
 [bits 32]
 enable_A20_keyboard_controller:
     push ax
@@ -180,32 +220,3 @@ enable_A20_fast:
 
     .return:
         ret
-
-
-; esi: string pointer
-write:
-    push ax
-    push esi
-
-    mov ah, 0x0E
-
-    .loop:
-        mov al, [esi]
-
-        cmp al, 0
-        je  .return
-
-        int 0x10
-
-        inc esi
-        jmp .loop
-
-    .return:
-        pop esi
-        pop ax
-        ret
-
-
-
-enable_A20_error: db "Failed to enable A20", 0x0D, 0x0A, 0
-disk_read_error: db "Disk read error", 0x0D, 0x0A, 0

@@ -6,10 +6,12 @@ _start:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
 
-	times 4 call new_line
-а
+	times 5 call new_line
+
 	mov  esi, kernel_text
 	call write
+
+	call setup_gdt
 
 	call setup_idt
 	
@@ -21,7 +23,6 @@ _start:
 
 	; in  ax, 0x60
 	; cmp ax, 0x0
-	; jne interrupt_handler
 
 	cli
 	hlt
@@ -43,9 +44,10 @@ interrupt_handler:
 
 
 
-%include "src/kernel/VGA_functions.asm"
+%include "src/kernel/GDT.asm"
+%include "src/kernel/VGA.asm"
 
-kernel_text:    db "Starting kernel...", 0x10, 0
+kernel_text:    db "== Kernel Setup ==", 0x10, 0
 interrupt_text: db "Interrupt received: ", 0
 
 %include "src/kernel/IDT.asm"

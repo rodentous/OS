@@ -21,4 +21,4 @@ concatenate:
 	cat "bin/bootloader.bin" "bin/kernel.bin" "bin/bunch_of_zeroes.bin" > "bin/OS.bin"
 
 run:
-	${qemu} -drive format=raw,file="bin/OS.bin"
+	${qemu} bin/OS.bin

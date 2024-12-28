@@ -1,7 +1,7 @@
 VGA_WIDTH equ 80
 VGA_HEIGHT equ 25
 
-
+; colors
 BLACK equ 0
 
 BLUE equ 1
@@ -24,8 +24,11 @@ LIGHT_BROWN equ 14
 WHITE equ 15
 
 
+
+
+; ==convert position to id of VGA buffer entry==
 ; cx: position
-; return cx:  VGA buffer id
+; return cx: VGA buffer id
 get_vga_buffer_id:
 	push dx
 
@@ -42,13 +45,15 @@ get_vga_buffer_id:
 		jmp .multiply
 		
 	.return:
-		shl cx, 1            ; multiply by two since each entry takes two bytes
+		shl cx, 1            ; multiply by two since each entry is two bytes long
 
 		pop dx
 		ret
 
 
-set_vga_cursor:              ; i dont know how this code works yet
+
+; ==set cursor position==
+set_vga_cursor:              ;  idk how this works
 	pusha
 	
 	mov cx, [cursor]
@@ -76,6 +81,7 @@ set_vga_cursor:              ; i dont know how this code works yet
 	ret
 
 
+; ==set character at given position==
 ; al: ASCII character
 ; cx: position
 set_character:
@@ -86,21 +92,24 @@ set_character:
 	; character byte: [ code point x8 ]
 	; attribute byte: [ foreground x4, background x3, blink ]
 
-    ; both colors in ah:
+    ; move both colors in ah:
 	mov ah, [color.background]
 	shl ah, 4
 	or  ah, [color.foreground]
 
+	call get_vga_buffer_id       ; ecx: VGA buffer id
+
 	; al: character byte
 	; ah: attribute byte
-	call get_vga_buffer_id   ; ecx: buffer id
-	mov word [0xB8000 + ecx], ax
+	; ecx: VGA buffer id
+	mov word [0xB8000 + ecx], ax ; set character
 
 	pop cx
 	pop ax
 	ret
 
 
+; ==clear whole screen==
 clear:
 	push cx
 	push edx
@@ -109,11 +118,12 @@ clear:
 	
 	.loop:
 		cmp cx, VGA_WIDTH * VGA_HEIGHT
-		jge .return          ; break if reached last character
+		jge .return           ; break if reached last character
 
 		mov dx, cx
-		shl dx, 1            ; every entry takes 2 bytes
+		shl dx, 1             ; every entry is 2 bytes
 
+		; reset character
 		mov word [0xB8000 + edx], 0
 		
 		inc cx
@@ -124,6 +134,7 @@ clear:
 		pop cx
 
 
+; ==move every character on screen up==
 scroll:
 	pusha
 	xor cx, cx               ; reset cx
@@ -133,11 +144,11 @@ scroll:
 		jge .return
 
 		mov dx, cx           ; character position
-		shl dx, 1            ; every entry takes 2 bytes
+		shl dx, 1            ; every entry is 2 bytes
 		
 		mov bx, cx
 		add bx, VGA_WIDTH    ; position of character below
-		shl bx, 1            ; every entry takes 2 bytes
+		shl bx, 1            ; every entry is 2 bytes
 
 		; swap character with character below
 		mov ax, word [0xB8000 + ebx]
@@ -151,6 +162,7 @@ scroll:
 		ret
 
 
+; ==new line==
 new_line:
 	push cx
 	mov cx, [cursor]
@@ -174,6 +186,7 @@ new_line:
 		ret
 
 
+; ==write character at cursor position==
 ; al: ASCII character
 write_character:
 	push cx
@@ -181,10 +194,10 @@ write_character:
 
 	cmp cl, VGA_WIDTH        ; new line if last column
 	jge .new_line
-	cmp al, 0x10             ; new line if line feed character
+	cmp al, 0x10             ; new line if special line feed "line feed" character
 	je  .new_line
 
-	call set_character       ; write character
+	call set_character       ; set character
 
 	inc cl                   ; next column
 	jmp .return
@@ -209,6 +222,7 @@ write_character:
 		ret
 
 
+; ==write string==
 ; esi: string pointer
 write:
 	pusha
@@ -228,6 +242,7 @@ write:
 		ret
 
 
+; ==write decimal nubmer==
 ; al: number
 write_number:
 	pusha
@@ -258,10 +273,13 @@ write_number:
 
 
 
+
+; current color
 color:
 	.foreground: db 0
 	.background: db 0
 
+; cursor position
 cursor: 
 	.column: db 0
 	.line: db 0
