@@ -55,6 +55,11 @@ switch_to_protected_mode:
 %include "src/bootloader/GDT.asm"
 %include "src/bootloader/functions.asm"
 
+boot_text:   db "== OS Bootloader ==", 0x0D, 0x0A, 0
+disk_text:   db "-Disk loaded", 0x0D, 0x0A, 0
+GDT_text:    db "-GDT", 0x0D, 0x0A, 0
+kernel_text: db "-Starting kernel", 0
+
 
 
 
@@ -78,11 +83,6 @@ start_protected_mode:
 
 
 
-
-boot_text:   db "== OS Bootloader ==", 0x0D, 0x0A, 0
-disk_text:   db "-Disk loaded", 0x0D, 0x0A, 0
-GDT_text:    db "-GDT", 0x0D, 0x0A, 0
-kernel_text: db "-Starting kernel", 0
 
 ; set last 2 bytes to 0xAA55 (magic number)
 times 510-($-$$) db 0

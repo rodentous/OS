@@ -1,4 +1,6 @@
-extern interrupt_handler
+; section .data
+
+[extern interrupt_handler]
 isr_common_stub:
 	pusha
 
@@ -9,7 +11,7 @@ isr_common_stub:
 
 ; Interrupt Service Routine
 %macro isr 1
-	global isr_%1
+	[global isr_%1]
 	isr_%1:
 		cli
 		; push byte 0

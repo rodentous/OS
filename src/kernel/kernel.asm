@@ -1,7 +1,7 @@
 [bits 32]
 
 
-global _start
+[global _start]
 _start:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], BLACK
@@ -11,25 +11,29 @@ _start:
 	mov  esi, kernel_text
 	call write
 
-	lgdt [GDT_descriptor]
-
-	call setup_idt
 	
+	call setup_idt
 	int 0
 	int 1
 	int 2
 	int 3
 	int 4
 
-	; in  ax, 0x60
-	; cmp ax, 0x0
+	.loop:
+		mov bx, ax
+		call read_key
+		cmp bx, ax
+		je .loop
+		call write_character
+		jmp .loop
 
 	cli
 	hlt
 
 
 
-global interrupt_handler
+
+[global interrupt_handler]
 interrupt_handler:
 	pusha
 
@@ -44,9 +48,10 @@ interrupt_handler:
 
 
 
-%include "src/kernel/GDT.asm"
 %include "src/kernel/IDT.asm"
 %include "src/kernel/VGA.asm"
+%include "src/kernel/keyboard.asm"
+
 
 kernel_text:    db "== Kernel Setup ==", 0x10, 0
-interrupt_text: db "Interrupt received: ", 0
+interrupt_text: db "Interrupt received: ", 0x10, 0
