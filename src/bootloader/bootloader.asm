@@ -16,7 +16,7 @@ switch_to_protected_mode:
 	mov esi, boot_text
 	call write
 
-	mov dh, 2                     ; number of sectors to read
+	mov dh, 32                    ; number of sectors to read
 	mov dl, dl ; (set by bios)    ; disk number
 	call disk_load                ; read disk
 

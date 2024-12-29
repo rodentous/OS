@@ -1,7 +1,7 @@
 asm := nasm
 ld := i386-elf-ld
 gcc := i386-elf-gcc
-qemu := qemu-system-x86_64
+qemu := qemu-system-i386
 
 all: clean bootloader kernel concatenate run
 

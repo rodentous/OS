@@ -11,18 +11,21 @@ _start:
 	mov  esi, kernel_text
 	call write
 
-	
 	call setup_idt
-	int 0
-	int 1
-	int 2
-	int 3
-	int 4
+	mov esi, IDT_text
+	call write
 
+	in al, 0x21
+	in ah, 0xA1
+
+	call new_line
+	mov ax, 0x0
 	.loop:
 		mov bx, ax
 		call read_key
-		cmp bx, ax
+		cmp ax, bx
+		je .loop
+		cmp ax, 0x0
 		je .loop
 		call write_character
 		jmp .loop
@@ -54,4 +57,5 @@ interrupt_handler:
 
 
 kernel_text:    db "== Kernel Setup ==", 0x10, 0
-interrupt_text: db "Interrupt received: ", 0x10, 0
+IDT_text:       db "-IDT", 0x10, 0
+interrupt_text: db "Interrupt received: ", 0
