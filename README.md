@@ -4,5 +4,6 @@
 ```shell
 yay -S i386-elf-binutils
 ```
-2. build with `make -s`
-3. install `qemu-base` and `qemu-desktop`, run with `make run`
+1. install `qemu-base` and `qemu-desktop`
+2. build and run with `make`
+3. run with `make run`
