@@ -48,7 +48,3 @@ GDT:
 GDT_descriptor:
 	dw (GDT.end - GDT) - 1  ; length
 	dd GDT                  ; base
-
-
-setup_gdt:
-    lgdt [GDT_descriptor]

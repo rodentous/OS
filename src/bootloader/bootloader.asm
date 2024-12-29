@@ -19,6 +19,7 @@ switch_to_protected_mode:
 	mov dh, 2                     ; number of sectors to read
 	mov dl, dl ; (set by bios)    ; disk number
 	call disk_load                ; read disk
+
 	; write "Disk loaded"
 	mov esi, disk_text
 	call write
@@ -28,6 +29,7 @@ switch_to_protected_mode:
 
 	; load GDT descriptor
 	lgdt [GDT_descriptor]
+
 	; write "GDT"
 	mov esi, GDT_text
 	call write

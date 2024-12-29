@@ -11,7 +11,7 @@ _start:
 	mov  esi, kernel_text
 	call write
 
-	call setup_gdt
+	lgdt [GDT_descriptor]
 
 	call setup_idt
 	
@@ -45,9 +45,8 @@ interrupt_handler:
 
 
 %include "src/kernel/GDT.asm"
+%include "src/kernel/IDT.asm"
 %include "src/kernel/VGA.asm"
 
 kernel_text:    db "== Kernel Setup ==", 0x10, 0
 interrupt_text: db "Interrupt received: ", 0
-
-%include "src/kernel/IDT.asm"

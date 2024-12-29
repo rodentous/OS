@@ -24,7 +24,7 @@ isr_common_stub:
 
 ; initialize ISRs
 %assign i 0
-%rep 32
+%rep 16
 	isr i
 	%assign i i+1
 %endrep
@@ -58,7 +58,7 @@ setup_idt:
 	lidt [IDT_descriptor]
 
 	%assign i 0
-	%rep 5
+	%rep 10
 		gate_descriptor i
 		%assign i i+1
 	%endrep
