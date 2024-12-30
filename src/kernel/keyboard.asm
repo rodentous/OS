@@ -2,7 +2,8 @@
     cmp al, %1
     jne .%1
     mov al, %2
-    ret
+
+    jmp .return
     .%1:
 %endmacro
 
@@ -39,8 +40,10 @@ read_character:
     map 0x31, 'N'
     map 0x32, 'M'
 
+    map 0x39, ' '
     map 0x1C, 0x10
 
     mov al, 0x0
 
-    ret
+    .return:
+        ret
