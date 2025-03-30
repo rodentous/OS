@@ -1,10 +1,6 @@
 [extern isr_handler]
 isr_common_stub:
-	pusha
-
 	call isr_handler    ; from kernel.asm
-
-	popa
 
 	sti
 	iret
@@ -12,11 +8,7 @@ isr_common_stub:
 
 [extern irq_handler]
 irq_common_stub:
-	pusha
-
 	call irq_handler    ; from kernel.asm
-
-	popa
 
 	sti
 	iret
@@ -35,7 +27,7 @@ irq_common_stub:
 		jmp isr_common_stub
 %endmacro
 
-%macro isre 1
+%macro isre 1 ; same but with error code
 	[global isr_%1]
 	isr_%1:
 		cli
@@ -77,7 +69,6 @@ irq_common_stub:
 	isr 30  ; Reserved
 	isr 31  ; Reserved
 
-
 ; Interrupt Request handler
 %macro irq 1
 	[global isr_%1]
@@ -112,7 +103,7 @@ irq_common_stub:
 
 ; Interrupt Descriptor Table
 IDT:
-	.end:
+.end:
 
 IDT_descriptor:
 	dw (IDT.end - IDT) - 1   ; length
@@ -140,17 +131,17 @@ IDT_descriptor:
 setup_idt:
 	cli
 
-	; remap the PIC
-	outb 0x20, 0x11
-    outb 0xA0, 0x11
-    outb 0x21, 0x20
-    outb 0xA1, 0x28
-    outb 0x21, 0x04
-    outb 0xA1, 0x02
-    outb 0x21, 0x01
-    outb 0xA1, 0x01
-    outb 0x21, 0x0
-    outb 0xA1, 0x0
+	; ; remap the PIC
+	; outb 0x20, 0x11
+    ; outb 0xA0, 0x11
+    ; outb 0x21, 0x20
+    ; outb 0xA1, 0x28
+    ; outb 0x21, 0x04
+    ; outb 0xA1, 0x02
+    ; outb 0x21, 0x01
+    ; outb 0xA1, 0x01
+    ; outb 0x21, 0x0
+    ; outb 0xA1, 0x0
 
 	lidt [IDT_descriptor]
 
@@ -159,7 +150,6 @@ setup_idt:
 		gate_descriptor i
 		%assign i i+1
 	%endrep
-	
 
 	sti
 	ret

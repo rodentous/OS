@@ -38,12 +38,12 @@ get_vga_buffer_id:
 	.multiply:               ; multiply lines by VGA width
 		cmp dh, 0
 		jle .return
-		
+
 		add cx, VGA_WIDTH
 
 		dec dh
 		jmp .multiply
-		
+
 	.return:
 		shl cx, 1            ; multiply by two since each entry is two bytes long
 
@@ -55,7 +55,7 @@ get_vga_buffer_id:
 ; ==set cursor position==
 set_vga_cursor:              ;  idk how this works
 	pusha
-	
+
 	mov cx, [cursor]
 	call get_vga_buffer_id
 	shr cx, 1
@@ -115,7 +115,7 @@ clear:
 	push edx
 	xor cx, cx                ; reset cx
 	xor edx, edx              ; reset edx
-	
+
 	.loop:
 		cmp cx, VGA_WIDTH * VGA_HEIGHT
 		jge .return           ; break if reached last character
@@ -125,7 +125,7 @@ clear:
 
 		; reset character
 		mov word [0xB8000 + edx], 0
-		
+
 		inc cx
 		jmp .loop
 
@@ -138,14 +138,14 @@ clear:
 scroll:
 	pusha
 	xor cx, cx               ; reset cx
-	
+
 	.loop:
 		cmp cx, VGA_HEIGHT * VGA_WIDTH
 		jge .return
 
 		mov dx, cx           ; character position
 		shl dx, 1            ; every entry is 2 bytes
-		
+
 		mov bx, cx
 		add bx, VGA_WIDTH    ; position of character below
 		shl bx, 1            ; every entry is 2 bytes
@@ -156,7 +156,7 @@ scroll:
 
 		inc cx
 		jmp .loop
-	
+
 	.return:
 		popa
 		ret
@@ -201,7 +201,7 @@ write_character:
 
 	inc cl                   ; next column
 	jmp .return
-	
+
 	.new_line:
 		cmp ch, VGA_HEIGHT-1 ; scroll screen up if last line
 		jge .scroll
@@ -209,7 +209,7 @@ write_character:
 		mov cl, 0            ; reset column
 		inc ch               ; next line
 		jmp .return
-	
+
 	.scroll:
 		mov cl, 0
 		call scroll
@@ -246,7 +246,7 @@ write:
 ; al: number
 write_number:
 	pusha
-	
+
 	.loop:
 		cmp al, 10
 		jl  .return
@@ -255,13 +255,12 @@ write_number:
 		mov bl, 10
 		div bl
 
-		mov dl, al
+		mov bl, ah
 
-		add ah, '0'
-		mov al, ah
+		add al, '0'
 		call write_character
-		
-		mov al, dl
+
+		mov al, bl
 
 		jmp .loop
 

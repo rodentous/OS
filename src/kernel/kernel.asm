@@ -33,7 +33,7 @@ isr_handler:
 
 	call write_number
 	call new_line
-	
+
 	popa
 	ret
 
@@ -47,7 +47,7 @@ irq_handler:
 
 	call write_number
 	call new_line
-	
+
 	popa
 	ret
 
@@ -77,7 +77,7 @@ kernel_main:
 	.loop:
 		mov bl, al
 		call read_character
-		cmp al, bl
+		cmp bl, al
 		je .loop
 
 		cmp al, 0x0
