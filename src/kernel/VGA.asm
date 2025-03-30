@@ -110,7 +110,7 @@ set_character:
 
 
 ; ==clear whole screen==
-clear:
+clear_screen:
 	pusha
 	xor ax, ax                ; reset ax
 	xor cx, cx                ; reset cx

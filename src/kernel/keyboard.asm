@@ -10,11 +10,13 @@
 ; ==convert input to character==
 ; return al: ASCII character
 read_character:
+    ; wait for PS/2
     in al, 0x64
     and al, 0b00000001
     cmp al, 0x1
     jne read_character
 
+    ; read
     in  al, 0x60
 
     map 0x10, 'q'
@@ -47,7 +49,7 @@ read_character:
     map 0x39, ' '      ; space
     map 0x1C, 0x10     ; new line
 
-    mov al, 0x0
+    mov al, 0x0        ; default null
 
     .return:
         ret

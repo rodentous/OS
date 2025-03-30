@@ -6,17 +6,9 @@ _start:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], LIGHT_BLUE
 
-	times 5 call new_line
-
-	mov  esi, setup_text
-	call write
+	call clear_screen
 
 	call setup_idt
-
-	mov esi, IDT_text
-	call write
-
-	call new_line
 
 	jmp kernel_main
 
@@ -59,8 +51,6 @@ irq_handler:
 %include "src/kernel/keyboard.asm"
 
 
-setup_text:    db "== Kernel Setup ==", 0x10, 0
-IDT_text:       db "-IDT", 0x10, 0
 interrupt_text: db "Interrupt received: ", 0
 
 
@@ -71,20 +61,17 @@ interrupt_text: db "Interrupt received: ", 0
 
 
 kernel_main:
-	call clear
 	mov esi, welcome_text
 	call write
 
 	.loop:
-		mov bl, al
 		call read_character
-		cmp bl, al
-		je .loop
 
+		; write character if not null
 		cmp al, 0x0
 		je .loop
-
 		call write_character
+
 		jmp .loop
 
 	cli
