@@ -153,17 +153,16 @@ scroll:
 		shl bx, 1            ; every entry is 2 bytes -> multiply by 2
 		shl dx, 1
 
-		; swap character with character below
+		; if on last line, clear character
 		cmp cx, VGA_HEIGHT * VGA_WIDTH - VGA_WIDTH
 		jl .swap
-
-		xor ax, ax
 		mov ah, [color.background]
 		shl ah, 4
 		mov word [0xB8000 + ebx], ax
 		jmp .skip
 
 		.swap:
+		; swap character with character below
 		mov ax, word [0xB8000 + edx]
 		mov word [0xB8000 + ebx], ax
 		.skip:
