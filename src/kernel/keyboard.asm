@@ -10,6 +10,11 @@
 ; ==convert input to character==
 ; return al: ASCII character
 read_character:
+    in al, 0x64
+    and al, 0b00000001
+    cmp al, 0x1
+    jne read_character
+
     in  al, 0x60
 
     map 0x10, 'q'

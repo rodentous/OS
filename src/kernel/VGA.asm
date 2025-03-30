@@ -111,10 +111,12 @@ set_character:
 
 ; ==clear whole screen==
 clear:
-	push cx
-	push edx
+	pusha
+	xor ax, ax                ; reset ax
 	xor cx, cx                ; reset cx
 	xor edx, edx              ; reset edx
+
+	mov [cursor], ax
 
 	.loop:
 		cmp cx, VGA_WIDTH * VGA_HEIGHT
@@ -124,14 +126,15 @@ clear:
 		shl dx, 1             ; every entry is 2 bytes
 
 		; reset character
-		mov word [0xB8000 + edx], 0
+		mov ah, [color.background]
+		shl ah, 4
+		mov word [0xB8000 + edx], ax
 
 		inc cx
 		jmp .loop
 
 	.return:
-		pop edx
-		pop cx
+		popa
 
 
 ; ==move every character on screen up==
@@ -141,18 +144,29 @@ scroll:
 
 	.loop:
 		cmp cx, VGA_HEIGHT * VGA_WIDTH
-		jge .return
+		jg .return
 
-		mov dx, cx           ; character position
-		shl dx, 1            ; every entry is 2 bytes
+		mov bx, cx           ; position of the character
+		mov dx, cx
+		add dx, VGA_WIDTH    ; position of character below
 
-		mov bx, cx
-		add bx, VGA_WIDTH    ; position of character below
-		shl bx, 1            ; every entry is 2 bytes
+		shl bx, 1            ; every entry is 2 bytes -> multiply by 2
+		shl dx, 1
 
 		; swap character with character below
-		mov ax, word [0xB8000 + ebx]
-		mov word [0xB8000 + edx], ax
+		cmp cx, VGA_HEIGHT * VGA_WIDTH - VGA_WIDTH
+		jl .swap
+
+		xor ax, ax
+		mov ah, [color.background]
+		shl ah, 4
+		mov word [0xB8000 + ebx], ax
+		jmp .skip
+
+		.swap:
+		mov ax, word [0xB8000 + edx]
+		mov word [0xB8000 + ebx], ax
+		.skip:
 
 		inc cx
 		jmp .loop

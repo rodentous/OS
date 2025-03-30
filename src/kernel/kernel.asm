@@ -4,7 +4,7 @@
 [global _start]
 _start:
 	mov byte [color.foreground], WHITE
-	mov byte [color.background], BLACK
+	mov byte [color.background], LIGHT_BLUE
 
 	times 5 call new_line
 
@@ -71,6 +71,7 @@ interrupt_text: db "Interrupt received: ", 0
 
 
 kernel_main:
+	call clear
 	mov esi, welcome_text
 	call write
 
