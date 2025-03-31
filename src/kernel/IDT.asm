@@ -47,7 +47,7 @@ irq_%1:
 	jmp irq_common
 %endmacro
 
-; Exceptions without error codes
+; Exceptions
 ISR 0   ; Divide-by-zero
 ISR 1   ; Debug
 ISR 2   ; NMI
