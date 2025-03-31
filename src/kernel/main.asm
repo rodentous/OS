@@ -31,6 +31,11 @@ main:
 		cmp bl, 0x1
 		je .meow
 
+		mov edi, clear_command
+		call compare_strings
+		cmp bl, 0x1
+		je .clear
+
 		mov edi, help_command
 		call compare_strings
 		cmp bl, 0x1
@@ -53,6 +58,10 @@ main:
 		mov esi, input_text
 		call write
 		call new_line
+		jmp .loop
+
+	.clear:
+		call clear_screen
 		jmp .loop
 
 	.help:
@@ -146,8 +155,9 @@ compare_strings:
 prompt_text: db "$ ", 0x0
 exit_command: db "exit", 0x0
 meow_command: db "meow", 0x0
+clear_command: db "clear", 0x0
 help_command: db "help", 0x0
-help_text: db "CASH (CAt SHell) usage:", 0x0A, "    exit - terminate cash", 0x0A, "    meow - print last entered command (its always meow lol)", 0x0A, "    help - print this text", 0x0A, 0x0
+help_text: db "CASH (CAt SHell) usage:", 0x0A, "    exit - terminate cash", 0x0A, "    meow - print last entered command (its always meow lol)", 0x0A, "    clear - clear screen", 0x0A, "    help - print this text", 0x0A, 0x0
 unknown_command_text: db "unknown command: ", 0x0
 input_text: times 1000 db 0x0
 
