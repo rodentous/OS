@@ -1,4 +1,4 @@
-kernel_main:
+main:
 	mov byte [color.foreground], WHITE
 	mov byte [color.background], LIGHT_BLUE
 

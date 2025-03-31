@@ -1,103 +1,102 @@
 [extern isr_handler]
-isr_common_stub:
-	call isr_handler    ; from kernel.asm
+isr_common:
+	call write_number
+	call new_line
 
-	sti
-	iret
-
+	popa
+    sti
+    iret
 
 [extern irq_handler]
-irq_common_stub:
-	call irq_handler    ; from kernel.asm
+irq_common:
+	call write_number
+	call new_line
 
-	sti
-	iret
+	popa
+    sti
+    iret
 
 
 
 
-; Interrupt Service Routine
-%macro isr 1
-	[global isr_%1]
-	isr_%1:
-		cli
-		; push byte 0
-		; push byte %1
-		mov al, %1
-		jmp isr_common_stub
+; Interrupt Service Routines
+%macro ISR 1            ; exceptions
+[global isr_%1]
+isr_%1:
+	cli
+	pusha
+	mov al, %1
+	jmp isr_common
 %endmacro
 
-%macro isre 1 ; same but with error code
-	[global isr_%1]
-	isr_%1:
-		cli
-		; push byte %1
-		mov al, %1
-		jmp isr_common_stub
+%macro ISRE 1           ; exceptions with error codes
+[global isr_%1]
+isr_%1:
+	cli
+	pusha
+	mov al, %1
+	jmp isr_common
 %endmacro
 
-	isr 0   ; Divide By Zero Exception
-	isr 1   ; Debug Exception
-	isr 2   ; Non Maskable Interrupt Exception
-	isr 3   ; Int 3 Exception
-	isr 4   ; INTO Exception
-	isr 5   ; Out of Bounds Exception
-	isr 6   ; Invalid Opcode Exception
-	isr 7   ; Coprocessor Not Available Exception
-	isre 8  ; Double Fault Exception                 (With Error Code!)
-	isr  9  ; Coprocessor Segment Overrun Exception
-	isre 10 ; Bad TSS Exception                      (With Error Code!)
-	isre 11 ; Segment Not Present Exception          (With Error Code!)
-	isre 12 ; Stack Fault Exception                  (With Error Code!)
-	isre 13 ; General Protection Fault Exception     (With Error Code!)
-	isre 14 ; Page Fault Exception                   (With Error Code!)
-	isr 15  ; Reserved Exception
-	isr 16  ; Floating Point Exception
-	isr 17  ; Alignment Check Exception
-	isr 18  ; Machine Check Exception
-	isr 19  ; Reserved
-	isr 20  ; Reserved
-	isr 21  ; Reserved
-	isr 22  ; Reserved
-	isr 23  ; Reserved
-	isr 24  ; Reserved
-	isr 25  ; Reserved
-	isr 26  ; Reserved
-	isr 27  ; Reserved
-	isr 28  ; Reserved
-	isr 29  ; Reserved
-	isr 30  ; Reserved
-	isr 31  ; Reserved
-
-; Interrupt Request handler
-%macro irq 1
-	[global isr_%1]
-	isr_%1:
-		cli
-		; push byte 0
-		; push byte %1
-		mov al, %1-31
-		jmp irq_common_stub
+%macro IRQ 1            ; for hardware IRQs
+[global irq_%1]
+irq_%1:
+	cli
+	pusha
+	mov al, %1
+	jmp irq_common
 %endmacro
 
-	irq 32
-	irq 33
-	irq 34
-	irq 35
-	irq 36
-	irq 37
-	irq 38
-	irq 39
-	irq 40
-	irq 41
-	irq 42
-	irq 43
-	irq 44
-	irq 45
-	irq 46
-	irq 47
-	irq 48
-
+; Exceptions without error codes
+ISR 0   ; Divide-by-zero
+ISR 1   ; Debug
+ISR 2   ; NMI
+ISR 3   ; Breakpoint
+ISR 4   ; Overflow
+ISR 5   ; Bound Range Exceeded
+ISR 6   ; Invalid Opcode
+ISR 7   ; Device Not Available
+ISRE 8  ; Double Fault
+ISR  9  ; Coprocessor Segment Overrun
+ISRE 10 ; Invalid TSS
+ISRE 11 ; Segment Not Present
+ISRE 12 ; Stack-Segment Fault
+ISRE 13 ; General Protection Fault
+ISRE 14 ; Page Fault
+ISR 15  ; Reserved
+ISR 16  ; Reserved
+ISR 17  ; Reserved
+ISR 18  ; Reserved
+ISR 19  ; Reserved
+ISR 20  ; Reserved
+ISR 21  ; Reserved
+ISR 22  ; Reserved
+ISR 23  ; Reserved
+ISR 24  ; Reserved
+ISR 25  ; Reserved
+ISR 26  ; Reserved
+ISR 27  ; Reserved
+ISR 28  ; Reserved
+ISR 29  ; Reserved
+ISR 30  ; Reserved
+ISR 31  ; Reserved
+; IRQ handlers
+IRQ 0   ; Timer
+IRQ 1   ; Keyboard
+IRQ 2   ; Cascade (PIC2)
+IRQ 3   ; COM2
+IRQ 4   ; COM1
+IRQ 5   ; LPT2
+IRQ 6   ; Floppy Disk
+IRQ 7   ; LPT1
+IRQ 8   ; CMOS RTC
+IRQ 9   ; Legacy SCSI/NIC
+IRQ 10  ; SCSI/NIC
+IRQ 11  ; SCSI/NIC
+IRQ 12  ; PS/2 Mouse
+IRQ 13  ; FPU
+IRQ 14  ; Primary ATA
+IRQ 15  ; Secondary ATA
 
 
 
@@ -110,21 +109,13 @@ IDT_descriptor:
 	dd IDT                   ; base
 
 
-%macro gate_descriptor 1
-	mov eax, isr_%1
+%macro IDT_ENTRY 2
+	mov eax, %2
     mov [IDT + %1 * 8], ax
     mov word [IDT + %1 * 8 + 2], 0x08
     mov word [IDT + %1 * 8 + 4], 0x8E00
     shr eax, 16
     mov [IDT + %1 * 8 + 6], ax
-%endmacro
-
-
-
-
-%macro outb 2
-	mov ax, %2
-	out %1, ax
 %endmacro
 
 ; initialize IDT
@@ -133,11 +124,54 @@ setup_idt:
 
 	lidt [IDT_descriptor]
 
-	%assign i 0
-	%rep 48
-		gate_descriptor i
-		%assign i i+1
-	%endrep
+	IDT_ENTRY 0, isr_0
+	IDT_ENTRY 1, isr_1
+	IDT_ENTRY 2, isr_2
+	IDT_ENTRY 3, isr_3
+	IDT_ENTRY 4, isr_4
+	IDT_ENTRY 5, isr_5
+	IDT_ENTRY 6, isr_6
+	IDT_ENTRY 7, isr_7
+	IDT_ENTRY 8, isr_8
+	IDT_ENTRY 9, isr_9
+	IDT_ENTRY 10, isr_10
+	IDT_ENTRY 11, isr_11
+	IDT_ENTRY 12, isr_12
+	IDT_ENTRY 13, isr_13
+	IDT_ENTRY 14, isr_14
+	IDT_ENTRY 15, isr_15
+	IDT_ENTRY 16, isr_16
+	IDT_ENTRY 17, isr_17
+	IDT_ENTRY 18, isr_18
+	IDT_ENTRY 19, isr_19
+	IDT_ENTRY 20, isr_20
+	IDT_ENTRY 21, isr_21
+	IDT_ENTRY 22, isr_22
+	IDT_ENTRY 23, isr_23
+	IDT_ENTRY 24, isr_24
+	IDT_ENTRY 25, isr_25
+	IDT_ENTRY 26, isr_26
+	IDT_ENTRY 27, isr_27
+	IDT_ENTRY 28, isr_28
+	IDT_ENTRY 29, isr_29
+	IDT_ENTRY 30, isr_30
+	IDT_ENTRY 31, isr_31
+	IDT_ENTRY 32, irq_0
+	IDT_ENTRY 33, irq_1
+	IDT_ENTRY 34, irq_2
+	IDT_ENTRY 35, irq_3
+	IDT_ENTRY 36, irq_4
+	IDT_ENTRY 37, irq_5
+	IDT_ENTRY 38, irq_6
+	IDT_ENTRY 39, irq_7
+	IDT_ENTRY 40, irq_8
+	IDT_ENTRY 41, irq_9
+	IDT_ENTRY 42, irq_10
+	IDT_ENTRY 43, irq_11
+	IDT_ENTRY 44, irq_12
+	IDT_ENTRY 45, irq_13
+	IDT_ENTRY 46, irq_14
+	IDT_ENTRY 47, irq_15
 
 	sti
 	ret

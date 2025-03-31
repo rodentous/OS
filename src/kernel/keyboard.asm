@@ -1,12 +1,5 @@
-%macro map 2
-    cmp al, %1
-    jne .%1
-    mov al, %2
-    jmp .return
-    .%1:
-%endmacro
-
-
+; ==read input from keyboard==
+; return al: scancode
 read_character:
     ; wait for PS/2
     in al, 0x64
@@ -19,6 +12,14 @@ read_character:
 
     ret
 
+
+%macro map 2
+    cmp al, %1
+    jne .%1
+    mov al, %2
+    jmp .return
+    .%1:
+%endmacro
 
 ; ==convert input to character==
 ; return al: ASCII character
