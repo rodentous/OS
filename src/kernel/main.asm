@@ -36,6 +36,9 @@ main:
 		cmp bl, 0x1
 		je .help
 
+		cmp byte [input_text], 0x0
+		je .loop
+
 		mov byte [color.foreground], LIGHT_RED
 		mov esi, unknown_command_text
 		call write
