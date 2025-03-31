@@ -7,8 +7,6 @@
 %endmacro
 
 
-; ==convert input to character==
-; return al: ASCII character
 read_character:
     ; wait for PS/2
     in al, 0x64
@@ -18,6 +16,14 @@ read_character:
 
     ; read
     in  al, 0x60
+
+    ret
+
+
+; ==convert input to character==
+; return al: ASCII character
+input_character:
+    call read_character
 
     map 0x10, 'q'
     map 0x11, 'w'
@@ -47,9 +53,11 @@ read_character:
     map 0x32, 'm'
 
     map 0x39, ' '      ; space
-    map 0x1C, 0x10     ; new line
+    map 0x1C, 0x0A     ; new line
+    map 0x0E, 0x08     ; backspace
 
-    mov al, 0x0        ; default null
+    ret
 
     .return:
+		call write_character
         ret

@@ -51,12 +51,14 @@ get_vga_buffer_id:
 		ret
 
 
-
 ; ==set cursor position==
 set_vga_cursor:              ;  idk how this works
 	pusha
 
 	mov cx, [cursor]
+	mov al, ' '
+	call set_character
+
 	call get_vga_buffer_id
 	shr cx, 1
 	mov bx, cx
@@ -116,8 +118,6 @@ clear_screen:
 	xor cx, cx                ; reset cx
 	xor edx, edx              ; reset edx
 
-	mov [cursor], ax
-
 	.loop:
 		cmp cx, VGA_WIDTH * VGA_HEIGHT
 		jge .return           ; break if reached last character
@@ -134,7 +134,11 @@ clear_screen:
 		jmp .loop
 
 	.return:
+		xor cx, cx
+		mov [cursor], cx
+		call set_vga_cursor
 		popa
+		ret
 
 
 ; ==move every character on screen up==
@@ -156,6 +160,8 @@ scroll:
 		; if on last line, clear character
 		cmp cx, VGA_HEIGHT * VGA_WIDTH - VGA_WIDTH
 		jl .swap
+
+		xor ax, ax
 		mov ah, [color.background]
 		shl ah, 4
 		mov word [0xB8000 + ebx], ax
@@ -199,38 +205,73 @@ new_line:
 		ret
 
 
+; ==erase character==
+erase_character:
+	push cx
+	push ax
+	mov cx, [cursor]
+	xor ax, ax
+
+	cmp cl, 0                    ; prev line if first column
+	jle .previous_line
+
+	.erase:
+		dec cl                   ; prev column
+		call set_character       ; set character
+
+		jmp .return
+
+	.previous_line:
+		cmp ch, 0
+		jle .return
+
+		mov cl, VGA_WIDTH        ; reset column
+		dec ch                   ; prev line
+		jmp .erase
+
+	.return:
+		mov [cursor], cx         ; set cursor position
+		call set_vga_cursor
+		pop ax
+		pop cx
+		ret
+
+
 ; ==write character at cursor position==
 ; al: ASCII character
 write_character:
 	push cx
 	mov cx, [cursor]
 
-	cmp cl, VGA_WIDTH        ; new line if last column
+	cmp cl, VGA_WIDTH            ; new line if last column
 	jge .new_line
-	cmp al, 0x10             ; new line if special line feed "line feed" character
+	cmp al, 0x0A                 ; new line if special line feed "line feed" character
 	je  .new_line
+	cmp al, 0x08                 ; erase character if backspace
+	je .erase
 
-	call set_character       ; set character
+	.write:
+		call set_character       ; set character
+		inc cl                   ; next column
 
-	inc cl                   ; next column
-	jmp .return
-
-	.new_line:
-		cmp ch, VGA_HEIGHT-1 ; scroll screen up if last line
-		jge .scroll
-
-		mov cl, 0            ; reset column
-		inc ch               ; next line
+		mov [cursor], cx          ; set cursor position
+		call set_vga_cursor
 		jmp .return
 
-	.scroll:
-		mov cl, 0
-		call scroll
+	.new_line:
+		call new_line
+		mov cx, [cursor]
+
+		cmp al, 0x0A             ; dont print line feed
+		je .return
+
+		jmp .write
+
+	.erase:
+		call erase_character
 		jmp .return
 
 	.return:
-		mov [cursor], cx     ; set cursor position
-		call set_vga_cursor
 		pop cx
 		ret
 
