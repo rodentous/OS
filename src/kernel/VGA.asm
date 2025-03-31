@@ -225,8 +225,8 @@ erase_character:
 		cmp ch, 0
 		jle .return
 
-		mov cl, VGA_WIDTH        ; reset column
 		dec ch                   ; prev line
+		mov cl, VGA_WIDTH        ; reset column
 		jmp .erase
 
 	.return:

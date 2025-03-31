@@ -1,14 +1,14 @@
 ; ==read input from keyboard==
 ; return al: scancode
-read_character:
+read_input:
     ; wait for PS/2
     in al, 0x64
     and al, 0b00000001
     cmp al, 0x1
-    jne read_character
+    jne read_input
 
     ; read
-    in  al, 0x60
+    in al, 0x60
 
     ret
 
@@ -21,11 +21,11 @@ read_character:
     .%1:
 %endmacro
 
-; ==convert input to character==
-; return al: ASCII character
-input_character:
-    call read_character
 
+; ==convert input to character==
+; al: scancode
+; return al: ASCII character
+get_ascii_character:
     map 0x10, 'q'
     map 0x11, 'w'
     map 0x12, 'e'
@@ -57,8 +57,7 @@ input_character:
     map 0x1C, 0x0A     ; new line
     map 0x0E, 0x08     ; backspace
 
-    ret
+    mov al, 0x0
 
     .return:
-		call write_character
         ret

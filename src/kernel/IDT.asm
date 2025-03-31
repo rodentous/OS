@@ -1,7 +1,7 @@
 [extern isr_handler]
 isr_common:
-	call write_number
-	call new_line
+	; call write_number
+	; call new_line
 
 	popa
     sti
@@ -9,8 +9,8 @@ isr_common:
 
 [extern irq_handler]
 irq_common:
-	call write_number
-	call new_line
+	; call write_number
+	; call new_line
 
 	popa
     sti
