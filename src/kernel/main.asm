@@ -1,8 +1,14 @@
+[bits 32]
+%include "src/kernel/VGA.asm"
+%include "src/kernel/keyboard.asm"
+
+
+[global main]
 main:
 	pusha
 
 	mov byte [color.foreground], WHITE
-	mov byte [color.background], BLUE
+	mov byte [color.background], LIGHT_BLUE
 
 	call clear_screen
 	mov esi, welcome_text

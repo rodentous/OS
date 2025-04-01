@@ -24,8 +24,6 @@ LIGHT_BROWN equ 14
 WHITE equ 15
 
 
-
-
 ; ==convert position to id of VGA buffer entry==
 ; cx: position
 ; return cx: VGA buffer id

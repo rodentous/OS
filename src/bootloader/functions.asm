@@ -9,7 +9,7 @@ enter_text_mode:
     mov ah, 0x0
 	mov al, 0x3
 	int 0x10
-    
+
     pop ax
     ret
 
@@ -83,14 +83,14 @@ enable_A20:
         call check_A20
         cmp  ax, 1
         je   .return
-        
+
         mov esi, enable_A20_error
         call write
 
     ; try:
     in  al, 0xEE
     jmp .check_A20 ; check
-    
+
     ; try:
     call enable_A20_fast
     jmp  .check_A20 ; check
@@ -143,7 +143,7 @@ check_A20:
         mov [es:di], al
 
         shr ax, 8
-        
+
         sti
         pop es
         pop ds

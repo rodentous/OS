@@ -8,7 +8,6 @@ switch_to_protected_mode:
 	mov es, ax
 	mov ds, ax
 
-
 	; clear screen
 	call enter_text_mode
 
@@ -16,6 +15,7 @@ switch_to_protected_mode:
 	mov esi, boot_text
 	call write
 
+	; read disk
 	mov dh, 16                    ; number of sectors to read
 	mov dl, dl ; (set by bios)    ; disk number
 	call disk_load                ; read disk
@@ -32,10 +32,6 @@ switch_to_protected_mode:
 
 	; write "GDT"
 	mov esi, GDT_text
-	call write
-
-	; write "kernel"
-	mov esi, kernel_text
 	call write
 
 	; disable interupts
@@ -58,13 +54,12 @@ switch_to_protected_mode:
 boot_text:   db "== Bootloader ==", 0x0D, 0x0A, 0
 disk_text:   db "-Disk loaded", 0x0D, 0x0A, 0
 GDT_text:    db "-GDT", 0x0D, 0x0A, 0
-kernel_text: db "-Starting kernel", 0
-
 
 
 
 ; 32 bit protected mode:
 [bits 32]
+[extern kernel_entry]
 start_protected_mode:
 	mov ax, DATA_SEGMENT
 	mov ds, ax

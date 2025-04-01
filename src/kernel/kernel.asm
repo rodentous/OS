@@ -1,17 +1,11 @@
 [bits 32]
 
-
 [global _start]
+[extern main]
 _start:
 	call setup_idt
-
-	jmp main
-
+	call main
 	cli
 	hlt
 
-
 %include "src/kernel/IDT.asm"
-%include "src/kernel/keyboard.asm"
-%include "src/kernel/VGA.asm"
-%include "src/kernel/main.asm"
